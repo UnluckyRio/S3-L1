@@ -1,0 +1,85 @@
+QUERY RICHIESTE - DATABASE RELAZIONALE
+=====================================
+
+1. Selezionare tutti i clienti con nome 'Mario'
+-----------------------------------------------
+SELECT * FROM clienti WHERE nome = 'Mario';
+
+
+2. Estrazione di nome e cognome dei clienti nati nel 1982
+---------------------------------------------------------
+SELECT nome, cognome FROM clienti WHERE anno_di_nascita = 1982;
+
+
+3. Contare le fatture con IVA al 20%
+------------------------------------
+SELECT COUNT(*) AS numero_fatture_iva_20 FROM fatture WHERE iva = 20.00;
+
+
+4. Selezionare i prodotti attivati nel 2017 che sono in produzione o in commercio
+---------------------------------------------------------------------------------
+SELECT * FROM prodotti 
+WHERE EXTRACT(YEAR FROM data_attivazione) = 2017 
+AND (in_produzione = TRUE OR in_commercio = TRUE);
+
+
+5. Estrazione delle fatture con importo < 1000€ e relativi dati dei clienti associati
+--------------------------------------------------------------------------------------
+SELECT f.*, c.nome, c.cognome, c.anno_di_nascita, c.regione_residenza
+FROM fatture f
+JOIN clienti c ON f.id_cliente = c.numero_cliente
+WHERE f.importo < 1000.00;
+
+
+6. Elenco fatture (numero, importo, iva, data) con denominazione del fornitore
+------------------------------------------------------------------------------
+SELECT f.numero_fattura, f.importo, f.iva, f.data_fattura, fo.denominazione
+FROM fatture f
+JOIN fornitori fo ON f.numero_fornitore = fo.numero_fornitore;
+
+
+7. Conteggio fatture con IVA 20% raggruppate per anno
+-----------------------------------------------------
+SELECT EXTRACT(YEAR FROM data_fattura) AS anno, COUNT(*) AS numero_fatture
+FROM fatture 
+WHERE iva = 20.00
+GROUP BY EXTRACT(YEAR FROM data_fattura)
+ORDER BY anno;
+
+
+8. Numero di fatture e somma importi raggruppati per anno di fatturazione
+-------------------------------------------------------------------------
+SELECT 
+    EXTRACT(YEAR FROM data_fattura) AS anno,
+    COUNT(*) AS numero_fatture,
+    SUM(importo) AS somma_importi
+FROM fatture
+GROUP BY EXTRACT(YEAR FROM data_fattura)
+ORDER BY anno;
+
+
+9. Estrazione degli anni con più di 2 fatture di tipo 'A'
+----------------------------------------------------------
+SELECT EXTRACT(YEAR FROM data_fattura) AS anno, COUNT(*) AS numero_fatture_tipo_A
+FROM fatture
+WHERE tipologia = 'A'
+GROUP BY EXTRACT(YEAR FROM data_fattura)
+HAVING COUNT(*) > 2
+ORDER BY anno;
+
+
+10. Totale importi fatture raggruppati per regione di residenza dei clienti
+---------------------------------------------------------------------------
+SELECT c.regione_residenza, SUM(f.importo) AS totale_importi
+FROM fatture f
+JOIN clienti c ON f.id_cliente = c.numero_cliente
+GROUP BY c.regione_residenza
+ORDER BY totale_importi DESC;
+
+
+11. Conteggio clienti nati nel 1980 con almeno una fattura > 50€
+----------------------------------------------------------------
+SELECT COUNT(DISTINCT c.numero_cliente) AS clienti_1980_con_fatture_over_50
+FROM clienti c
+JOIN fatture f ON c.numero_cliente = f.id_cliente
+WHERE c.anno_di_nascita = 1980 AND f.importo > 50.00;
