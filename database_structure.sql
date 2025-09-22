@@ -42,7 +42,7 @@ CREATE TABLE fatture (
     tipologia CHAR(1) NOT NULL,
     importo DECIMAL(10,2) NOT NULL,
     iva DECIMAL(5,2) NOT NULL,
-    id_cliente INT NOT NULL,
+    numero_cliente_cliente INT NOT NULL,
     data_fattura DATE NOT NULL,
     numero_fornitore INT NOT NULL,
     FOREIGN KEY (id_cliente) REFERENCES clienti(numero_cliente),
@@ -82,7 +82,7 @@ INSERT INTO prodotti (descrizione, in_produzione, in_commercio, data_attivazione
 ('Prodotto F', TRUE, TRUE, '2017-12-01', NULL);
 
 -- Inserimento fatture
-INSERT INTO fatture (tipologia, importo, iva, id_cliente, data_fattura, numero_fornitore) VALUES
+INSERT INTO fatture (tipologia, importo, iva, numero_cliente, data_fattura, numero_fornitore) VALUES
 ('A', 1500.00, 22.00, 1, '2023-01-15', 1),
 ('B', 750.50, 20.00, 2, '2023-02-20', 2),
 ('A', 2200.00, 22.00, 3, '2023-03-10', 1),
@@ -122,7 +122,7 @@ AND (in_produzione = TRUE OR in_commercio = TRUE);
 -- 5. Estrazione delle fatture con importo < 1000€ e relativi dati dei clienti associati
 SELECT f.*, c.nome, c.cognome, c.anno_di_nascita, c.regione_residenza
 FROM fatture f
-JOIN clienti c ON f.id_cliente = c.numero_cliente
+JOIN clienti c ON f.numero_cliente_cliente = c.numero_cliente
 WHERE f.importo < 1000.00;
 
 -- 6. Elenco fatture (numero, importo, iva, data) con denominazione del fornitore
@@ -157,12 +157,12 @@ ORDER BY anno;
 -- 10. Totale importi fatture raggruppati per regione di residenza dei clienti
 SELECT c.regione_residenza, SUM(f.importo) AS totale_importi
 FROM fatture f
-JOIN clienti c ON f.id_cliente = c.numero_cliente
+JOIN clienti c ON f.numero_cliente = c.numero_cliente
 GROUP BY c.regione_residenza
 ORDER BY totale_importi DESC;
 
 -- 11. Conteggio clienti nati nel 1980 con almeno una fattura > 50€
 SELECT COUNT(DISTINCT c.numero_cliente) AS clienti_1980_con_fatture_over_50
 FROM clienti c
-JOIN fatture f ON c.numero_cliente = f.id_cliente
+JOIN fatture f ON c.numero_cliente = f.numero_cliente_cliente
 WHERE c.anno_di_nascita = 1980 AND f.importo > 50.00;
